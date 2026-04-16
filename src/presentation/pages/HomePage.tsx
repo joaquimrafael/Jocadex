@@ -14,7 +14,7 @@ import { Pokemon } from '@/domain/types/pokemon.types';
 export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('search') ?? '';
-  const selectedType = searchParams.get('type');
+  const selectedTypes = searchParams.getAll('type');
 
   const {
     pokemonList,
@@ -30,7 +30,7 @@ export function HomePage() {
     usePokemonSearch(searchTerm);
 
   const { types, typePokemonList, isLoading: isTypesLoading } =
-    usePokemonTypes(selectedType);
+    usePokemonTypes(selectedTypes);
 
   function handleSearchChange(value: string) {
     setSearchParams((prev) => {
@@ -45,14 +45,11 @@ export function HomePage() {
     });
   }
 
-  function handleTypeSelect(type: string | null) {
+  function handleTypeSelect(types: string[]) {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (type) {
-        next.set('type', type);
-      } else {
-        next.delete('type');
-      }
+      next.delete('type');
+      types.forEach((t) => next.append('type', t));
       next.delete('search');
       return next;
     });
@@ -71,7 +68,7 @@ export function HomePage() {
         <div className="-mx-4 px-4 overflow-x-auto py-1">
           <TypeFilter
             types={types}
-            selectedType={selectedType}
+            selectedTypes={selectedTypes}
             onTypeSelect={handleTypeSelect}
           />
         </div>
@@ -99,9 +96,8 @@ export function HomePage() {
     );
   }
 
-  if (selectedType) {
-    // Type filter mode: use the full list from the type endpoint directly,
-    // not a filtered subset of the paginated list.
+  if (selectedTypes.length > 0) {
+    // Type filter mode: use the intersection of Pokémon from selected type endpoints.
     displayList = typePokemonList ?? [];
     isLoading = isTypesLoading;
   }
@@ -113,7 +109,7 @@ export function HomePage() {
         <div className="-mx-4 px-4 overflow-x-auto py-1">
           <TypeFilter
             types={types}
-            selectedType={selectedType}
+            selectedTypes={selectedTypes}
             onTypeSelect={handleTypeSelect}
           />
         </div>
@@ -127,7 +123,7 @@ export function HomePage() {
 
   const countLabel = isLoading
     ? '\u00a0'
-    : selectedType
+    : selectedTypes.length > 0
       ? `${displayList.length} Pokémon`
       : `${pokemonList.length} of ${totalCount} Pokémon`;
 
@@ -138,7 +134,7 @@ export function HomePage() {
       <div className="-mx-4 px-4 overflow-x-auto py-1">
         <TypeFilter
           types={types}
-          selectedType={selectedType}
+          selectedTypes={selectedTypes}
           onTypeSelect={handleTypeSelect}
         />
       </div>
@@ -147,7 +143,7 @@ export function HomePage() {
 
       <PokemonGrid pokemonList={displayList} isLoading={isLoading} />
 
-      {!selectedType && (
+      {selectedTypes.length === 0 && (
         <LoadMoreButton
           onClick={() => fetchNextPage()}
           isLoading={isFetchingNextPage}

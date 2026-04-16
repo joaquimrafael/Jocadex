@@ -4,11 +4,22 @@ import { cn } from '@/shared/utils/cn';
 
 interface TypeFilterProps {
   types: string[];
-  selectedType: string | null;
-  onTypeSelect: (type: string | null) => void;
+  selectedTypes: string[];
+  onTypeSelect: (types: string[]) => void;
 }
 
-export function TypeFilter({ types, selectedType, onTypeSelect }: TypeFilterProps) {
+export function TypeFilter({ types, selectedTypes, onTypeSelect }: TypeFilterProps) {
+  const noneSelected = selectedTypes.length === 0;
+
+  function handleTypeClick(type: string) {
+    if (selectedTypes.includes(type)) {
+      const next = selectedTypes.filter((t) => t !== type);
+      onTypeSelect(next);
+    } else {
+      onTypeSelect([...selectedTypes, type]);
+    }
+  }
+
   return (
     <div
       className="flex gap-2 pb-2"
@@ -16,26 +27,26 @@ export function TypeFilter({ types, selectedType, onTypeSelect }: TypeFilterProp
       aria-label="Filter by type"
     >
       <button
-        onClick={() => onTypeSelect(null)}
+        onClick={() => onTypeSelect([])}
         className={cn(
           'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all',
-          selectedType === null
+          noneSelected
             ? 'bg-red-600 text-white ring-2 ring-red-600 ring-offset-1'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
         )}
-        aria-pressed={selectedType === null}
+        aria-pressed={noneSelected}
       >
         All
       </button>
 
       {types.map((type) => {
         const color = POKEMON_TYPE_COLORS[type] ?? '#888';
-        const isSelected = selectedType === type;
+        const isSelected = selectedTypes.includes(type);
 
         return (
           <button
             key={type}
-            onClick={() => onTypeSelect(isSelected ? null : type)}
+            onClick={() => handleTypeClick(type)}
             style={{
               backgroundColor: color,
               boxShadow: isSelected
