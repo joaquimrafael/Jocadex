@@ -5,7 +5,6 @@ import { PokemonTypesBadge } from '@/presentation/components/pokemon/PokemonType
 import { PokemonStats } from '@/presentation/components/pokemon/PokemonStats';
 import { PokemonAbilities } from '@/presentation/components/pokemon/PokemonAbilities';
 import { PokemonEvolutionChain } from '@/presentation/components/pokemon/PokemonEvolutionChain';
-import { ApiError } from '@/data/api/pokeApiClient';
 import { formatPokemonId } from '@/shared/utils/formatters';
 
 function DetailSection({
@@ -39,16 +38,13 @@ function DetailSkeleton() {
 
 export function PokemonDetailPage() {
   const { nameOrId = '' } = useParams<{ nameOrId: string }>();
-  const { pokemon, isLoading, isError, error } = usePokemonDetail(nameOrId);
+  const { pokemon, isLoading, isError } = usePokemonDetail(nameOrId);
 
   if (isLoading) {
     return <DetailSkeleton />;
   }
 
-  const is404 =
-    isError && error instanceof ApiError && error.status === 404;
-
-  if (is404 || (isError && !pokemon)) {
+  if (isError && !pokemon) {
     return (
       <div className="text-center py-16 space-y-4">
         <p className="text-6xl">🤷</p>

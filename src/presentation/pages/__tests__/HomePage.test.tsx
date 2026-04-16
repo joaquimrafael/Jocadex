@@ -96,4 +96,47 @@ describe('HomePage', () => {
     });
     expect(screen.getByText('All')).toBeInTheDocument();
   });
+
+  describe('type filter pagination', () => {
+    const waterPokemon = Array.from({ length: 25 }, (_, i) => ({
+      pokemon: {
+        name: `water-mon-${i + 1}`,
+        url: `${BASE}/pokemon/${100 + i}/`,
+      },
+      slot: 1,
+    }));
+
+    beforeEach(() => {
+      server.use(
+        http.get(`${BASE}/type/water`, () =>
+          HttpResponse.json({ name: 'water', pokemon: waterPokemon }),
+        ),
+      );
+    });
+
+    it('shows first 20 Pokémon when a type with >20 members is selected', async () => {
+      renderWithProviders(<HomePage />, { route: '/?type=water' });
+
+      await waitFor(() => {
+        expect(screen.getByText('water-mon-1')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('water-mon-20')).toBeInTheDocument();
+      expect(screen.queryByText('water-mon-21')).not.toBeInTheDocument();
+    });
+
+    it('shows more Pokémon after clicking Load More in type filter mode', async () => {
+      renderWithProviders(<HomePage />, { route: '/?type=water' });
+
+      await waitFor(() => {
+        expect(screen.getByText('water-mon-20')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: /load more pokémon/i }));
+
+      await waitFor(() => {
+        expect(screen.getByText('water-mon-25')).toBeInTheDocument();
+      });
+    });
+  });
 });

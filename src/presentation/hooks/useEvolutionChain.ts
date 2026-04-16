@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getEvolutionChain } from '@/data/repositories/pokemonRepository';
-import { mapToEvolutionStages } from '@/data/mappers/pokemonMapper';
-import { EvolutionStage } from '@/domain/types/pokemon.types';
+import { mapToEvolutionTree } from '@/data/mappers/pokemonMapper';
+import { EvolutionNode } from '@/domain/types/pokemon.types';
 
 export function useEvolutionChain(evolutionChainUrl: string) {
   const query = useQuery({
@@ -11,12 +11,12 @@ export function useEvolutionChain(evolutionChainUrl: string) {
     staleTime: Infinity,
   });
 
-  const stages: EvolutionStage[] = query.data
-    ? mapToEvolutionStages(query.data.chain)
-    : [];
+  const tree: EvolutionNode | null = query.data
+    ? mapToEvolutionTree(query.data.chain)
+    : null;
 
   return {
-    stages,
+    tree,
     isLoading: query.isLoading,
     isError: query.isError,
   };

@@ -115,12 +115,13 @@ export interface PokemonAbility {
   isHidden: boolean;
 }
 
-export interface EvolutionStage {
+export interface EvolutionNode {
   id: number;
   name: string;
   imageUrl: string;
   minLevel: number | null;
   trigger: string;
+  evolvesTo: EvolutionNode[];
 }
 
 export type PokemonType =

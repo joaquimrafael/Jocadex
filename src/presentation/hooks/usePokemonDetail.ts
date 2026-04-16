@@ -17,7 +17,7 @@ export function usePokemonDetail(nameOrId: string | number) {
   const speciesQuery = useQuery({
     queryKey: ['pokemon-species', nameOrId],
     queryFn: () => getPokemonSpecies(nameOrId),
-    enabled: detailQuery.isSuccess,
+    enabled: Boolean(nameOrId),
   });
 
   const pokemon: PokemonDetail | undefined = useMemo(() => {

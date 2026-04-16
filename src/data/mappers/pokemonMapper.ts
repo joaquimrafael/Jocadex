@@ -5,7 +5,7 @@ import {
   RawPokemonDetail,
   RawPokemonSpecies,
   EvolutionLink,
-  EvolutionStage,
+  EvolutionNode,
 } from '@/domain/types/pokemon.types';
 import {
   extractIdFromUrl,
@@ -78,26 +78,15 @@ export function mapToPokemonDetail(
   };
 }
 
-export function mapToEvolutionStages(chain: EvolutionLink): EvolutionStage[] {
-  const stages: EvolutionStage[] = [];
-
-  function traverse(link: EvolutionLink, isFirst: boolean) {
-    const id = extractIdFromUrl(link.species.url);
-    const detail = link.evolution_details[0];
-
-    stages.push({
-      id,
-      name: link.species.name,
-      imageUrl: getPokemonImageUrl(id),
-      minLevel: detail?.min_level ?? null,
-      trigger: detail?.trigger.name ?? (isFirst ? 'none' : 'level-up'),
-    });
-
-    for (const next of link.evolves_to) {
-      traverse(next, false);
-    }
-  }
-
-  traverse(chain, true);
-  return stages;
+export function mapToEvolutionTree(link: EvolutionLink, isFirst = true): EvolutionNode {
+  const id = extractIdFromUrl(link.species.url);
+  const detail = link.evolution_details[0];
+  return {
+    id,
+    name: link.species.name,
+    imageUrl: getPokemonImageUrl(id),
+    minLevel: detail?.min_level ?? null,
+    trigger: detail?.trigger.name ?? (isFirst ? 'none' : 'level-up'),
+    evolvesTo: link.evolves_to.map((next) => mapToEvolutionTree(next, false)),
+  };
 }

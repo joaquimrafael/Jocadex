@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { usePokemonList } from '@/presentation/hooks/usePokemonList';
 import { usePokemonSearch } from '@/presentation/hooks/usePokemonSearch';
@@ -11,10 +12,19 @@ import { PokemonCard } from '@/presentation/components/pokemon/PokemonCard';
 import { LoadingSpinner } from '@/presentation/components/ui/LoadingSpinner';
 import { Pokemon } from '@/domain/types/pokemon.types';
 
+const TYPE_PAGE_SIZE = 20;
+
 export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const searchTerm = searchParams.get('search') ?? '';
   const selectedTypes = searchParams.getAll('type');
+
+  const [typeVisibleCount, setTypeVisibleCount] = useState(TYPE_PAGE_SIZE);
+
+  const selectedTypesKey = selectedTypes.join(',');
+  useEffect(() => {
+    setTypeVisibleCount(TYPE_PAGE_SIZE);
+  }, [selectedTypesKey]);
 
   const {
     pokemonList,
@@ -24,6 +34,7 @@ export function HomePage() {
     isFetchingNextPage,
     isLoading: isListLoading,
     isError: isListError,
+    refetch,
   } = usePokemonList();
 
   const { result: searchResult, isLoading: isSearchLoading } =
@@ -58,6 +69,7 @@ export function HomePage() {
   // Determine which Pokemon list to display
   let displayList: Pokemon[] = pokemonList;
   let isLoading = isListLoading;
+  let totalTypeCount = 0;
 
   if (searchTerm) {
     // Search mode
@@ -98,7 +110,9 @@ export function HomePage() {
 
   if (selectedTypes.length > 0) {
     // Type filter mode: use the intersection of Pokémon from selected type endpoints.
-    displayList = typePokemonList ?? [];
+    const fullTypeList = typePokemonList ?? [];
+    totalTypeCount = fullTypeList.length;
+    displayList = fullTypeList.slice(0, typeVisibleCount);
     isLoading = isTypesLoading;
   }
 
@@ -115,7 +129,7 @@ export function HomePage() {
         </div>
         <ErrorMessage
           message="Failed to load Pokémon. Please try again."
-          onRetry={() => window.location.reload()}
+          onRetry={() => refetch()}
         />
       </div>
     );
@@ -124,7 +138,7 @@ export function HomePage() {
   const countLabel = isLoading
     ? '\u00a0'
     : selectedTypes.length > 0
-      ? `${displayList.length} Pokémon`
+      ? `${displayList.length} of ${totalTypeCount} Pokémon`
       : `${pokemonList.length} of ${totalCount} Pokémon`;
 
   return (
@@ -143,7 +157,13 @@ export function HomePage() {
 
       <PokemonGrid pokemonList={displayList} isLoading={isLoading} />
 
-      {selectedTypes.length === 0 && (
+      {selectedTypes.length > 0 ? (
+        <LoadMoreButton
+          onClick={() => setTypeVisibleCount((c) => c + TYPE_PAGE_SIZE)}
+          isLoading={false}
+          hasMore={typeVisibleCount < totalTypeCount}
+        />
+      ) : (
         <LoadMoreButton
           onClick={() => fetchNextPage()}
           isLoading={isFetchingNextPage}

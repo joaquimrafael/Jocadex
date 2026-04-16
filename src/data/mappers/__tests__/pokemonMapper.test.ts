@@ -2,11 +2,14 @@ import {
   mapToPokemon,
   mapToPokemonFromListItem,
   mapToPokemonDetail,
-  mapToEvolutionStages,
+  mapToEvolutionTree,
 } from '../pokemonMapper';
 import { bulbasaurDetailMock } from '@/test/mocks/data/pokemonDetail.mock';
 import { bulbasaurSpeciesMock } from '@/test/mocks/data/pokemonSpecies.mock';
-import { bulbasaurEvolutionChainMock } from '@/test/mocks/data/evolutionChain.mock';
+import {
+  bulbasaurEvolutionChainMock,
+  eeveeEvolutionChainMock,
+} from '@/test/mocks/data/evolutionChain.mock';
 
 describe('mapToPokemon', () => {
   it('maps raw detail to a clean Pokemon entity', () => {
@@ -107,32 +110,42 @@ describe('mapToPokemonDetail', () => {
   });
 });
 
-describe('mapToEvolutionStages', () => {
-  it('flattens the Bulbasaur chain into 3 stages', () => {
-    const stages = mapToEvolutionStages(bulbasaurEvolutionChainMock.chain);
-    expect(stages).toHaveLength(3);
+describe('mapToEvolutionTree', () => {
+  it('maps the Bulbasaur root node correctly', () => {
+    const tree = mapToEvolutionTree(bulbasaurEvolutionChainMock.chain);
+    expect(tree.id).toBe(1);
+    expect(tree.name).toBe('bulbasaur');
+    expect(tree.minLevel).toBeNull();
+    expect(tree.trigger).toBe('none');
+    expect(tree.imageUrl).toContain('official-artwork/1.png');
+    expect(tree.evolvesTo).toHaveLength(1);
   });
 
-  it('correctly maps the first stage (base form)', () => {
-    const stages = mapToEvolutionStages(bulbasaurEvolutionChainMock.chain);
-    expect(stages[0].id).toBe(1);
-    expect(stages[0].name).toBe('bulbasaur');
-    expect(stages[0].minLevel).toBeNull();
-    expect(stages[0].imageUrl).toContain('official-artwork/1.png');
+  it('maps the second node (ivysaur) with level requirement', () => {
+    const tree = mapToEvolutionTree(bulbasaurEvolutionChainMock.chain);
+    const ivysaur = tree.evolvesTo[0];
+    expect(ivysaur.id).toBe(2);
+    expect(ivysaur.name).toBe('ivysaur');
+    expect(ivysaur.minLevel).toBe(16);
+    expect(ivysaur.trigger).toBe('level-up');
+    expect(ivysaur.evolvesTo).toHaveLength(1);
   });
 
-  it('correctly maps the second stage with level requirement', () => {
-    const stages = mapToEvolutionStages(bulbasaurEvolutionChainMock.chain);
-    expect(stages[1].id).toBe(2);
-    expect(stages[1].name).toBe('ivysaur');
-    expect(stages[1].minLevel).toBe(16);
-    expect(stages[1].trigger).toBe('level-up');
+  it('maps the third node (venusaur) correctly', () => {
+    const tree = mapToEvolutionTree(bulbasaurEvolutionChainMock.chain);
+    const venusaur = tree.evolvesTo[0].evolvesTo[0];
+    expect(venusaur.id).toBe(3);
+    expect(venusaur.name).toBe('venusaur');
+    expect(venusaur.minLevel).toBe(32);
+    expect(venusaur.evolvesTo).toHaveLength(0);
   });
 
-  it('correctly maps the third stage with level requirement', () => {
-    const stages = mapToEvolutionStages(bulbasaurEvolutionChainMock.chain);
-    expect(stages[2].id).toBe(3);
-    expect(stages[2].name).toBe('venusaur');
-    expect(stages[2].minLevel).toBe(32);
+  it('maps branching evolutions (Eevee) with multiple children', () => {
+    const tree = mapToEvolutionTree(eeveeEvolutionChainMock.chain);
+    expect(tree.name).toBe('eevee');
+    expect(tree.evolvesTo.length).toBeGreaterThanOrEqual(2);
+    const names = tree.evolvesTo.map((n) => n.name);
+    expect(names).toContain('vaporeon');
+    expect(names).toContain('jolteon');
   });
 });

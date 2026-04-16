@@ -35,5 +35,6 @@ export function usePokemonList() {
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
+    refetch: query.refetch,
   };
 }

@@ -1,5 +1,46 @@
 import { RawEvolutionChain } from '@/domain/types/pokemon.types';
 
+export const eeveeEvolutionChainMock: RawEvolutionChain = {
+  id: 67,
+  chain: {
+    species: {
+      name: 'eevee',
+      url: 'https://pokeapi.co/api/v2/pokemon-species/133/',
+    },
+    evolution_details: [],
+    evolves_to: [
+      {
+        species: {
+          name: 'vaporeon',
+          url: 'https://pokeapi.co/api/v2/pokemon-species/134/',
+        },
+        evolution_details: [
+          {
+            min_level: null,
+            trigger: { name: 'use-item', url: 'https://pokeapi.co/api/v2/evolution-trigger/3/' },
+            item: null,
+          },
+        ],
+        evolves_to: [],
+      },
+      {
+        species: {
+          name: 'jolteon',
+          url: 'https://pokeapi.co/api/v2/pokemon-species/135/',
+        },
+        evolution_details: [
+          {
+            min_level: null,
+            trigger: { name: 'use-item', url: 'https://pokeapi.co/api/v2/evolution-trigger/3/' },
+            item: null,
+          },
+        ],
+        evolves_to: [],
+      },
+    ],
+  },
+};
+
 export const bulbasaurEvolutionChainMock: RawEvolutionChain = {
   id: 1,
   chain: {
