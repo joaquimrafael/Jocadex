@@ -20,7 +20,7 @@ export function TypeFilter({ types, selectedType, onTypeSelect }: TypeFilterProp
         className={cn(
           'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all',
           selectedType === null
-            ? 'bg-gray-800 text-white ring-2 ring-gray-800 ring-offset-1'
+            ? 'bg-red-600 text-white ring-2 ring-red-600 ring-offset-1'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
         )}
         aria-pressed={selectedType === null}

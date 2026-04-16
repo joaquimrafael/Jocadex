@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="border-t border-gray-100 mt-auto">
+    <footer className="border-t-2 border-red-200 mt-auto">
       <div className="container mx-auto px-4 py-4 text-center text-sm text-gray-400">
         Data provided by{' '}
         <a
