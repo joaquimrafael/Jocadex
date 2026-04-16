@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getAllTypes, getTypeDetail } from '@/data/repositories/typeRepository';
-import { extractIdFromUrl } from '@/shared/utils/urlHelpers';
+import { mapToPokemonFromListItem } from '@/data/mappers/pokemonMapper';
+import { Pokemon } from '@/domain/types/pokemon.types';
 
 const EXCLUDED_TYPES = new Set(['stellar', 'unknown']);
 
@@ -23,15 +24,17 @@ export function usePokemonTypes(selectedType: string | null = null) {
     staleTime: 1000 * 60 * 30,
   });
 
-  const typePokemonIds: number[] | null = typeDetailQuery.data
-    ? typeDetailQuery.data.pokemon.map((p) =>
-        extractIdFromUrl(p.pokemon.url),
+  // Build the full Pokémon list for the selected type directly from the type
+  // endpoint — which returns ALL Pokémon of that type, not just the paginated ones.
+  const typePokemonList: Pokemon[] | null = typeDetailQuery.data
+    ? typeDetailQuery.data.pokemon.map((entry) =>
+        mapToPokemonFromListItem(entry.pokemon),
       )
     : null;
 
   return {
     types,
-    typePokemonIds,
+    typePokemonList,
     isLoading: typesQuery.isLoading || typeDetailQuery.isLoading,
   };
 }

@@ -11,7 +11,7 @@ interface TypeFilterProps {
 export function TypeFilter({ types, selectedType, onTypeSelect }: TypeFilterProps) {
   return (
     <div
-      className="flex gap-2 overflow-x-auto pb-2"
+      className="flex gap-2 pb-2"
       role="group"
       aria-label="Filter by type"
     >
@@ -38,8 +38,9 @@ export function TypeFilter({ types, selectedType, onTypeSelect }: TypeFilterProp
             onClick={() => onTypeSelect(isSelected ? null : type)}
             style={{
               backgroundColor: color,
-              outline: isSelected ? `2px solid ${color}` : undefined,
-              outlineOffset: isSelected ? '2px' : undefined,
+              boxShadow: isSelected
+                ? 'inset 0 0 0 2px rgba(255,255,255,0.85), inset 0 0 0 4px rgba(0,0,0,0.15)'
+                : undefined,
             }}
             className={cn(
               'flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium text-white transition-all',

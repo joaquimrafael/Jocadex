@@ -24,8 +24,11 @@ export function usePokemonList() {
       page.results.map(mapToPokemonFromListItem),
     ) ?? [];
 
+  const totalCount = query.data?.pages[0]?.count ?? 0;
+
   return {
     pokemonList,
+    totalCount,
     fetchNextPage: query.fetchNextPage,
     hasNextPage: query.hasNextPage,
     isFetchingNextPage: query.isFetchingNextPage,

@@ -18,6 +18,7 @@ export function HomePage() {
 
   const {
     pokemonList,
+    totalCount,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -28,7 +29,7 @@ export function HomePage() {
   const { result: searchResult, isLoading: isSearchLoading } =
     usePokemonSearch(searchTerm);
 
-  const { types, typePokemonIds, isLoading: isTypesLoading } =
+  const { types, typePokemonList, isLoading: isTypesLoading } =
     usePokemonTypes(selectedType);
 
   function handleSearchChange(value: string) {
@@ -63,14 +64,21 @@ export function HomePage() {
 
   if (searchTerm) {
     // Search mode
+    const searchCount = isSearchLoading ? null : searchResult ? 1 : 0;
     return (
       <div className="space-y-6">
         <SearchBar value={searchTerm} onChange={handleSearchChange} />
-        <TypeFilter
-          types={types}
-          selectedType={selectedType}
-          onTypeSelect={handleTypeSelect}
-        />
+        <div className="-mx-4 px-4 overflow-x-auto py-1">
+          <TypeFilter
+            types={types}
+            selectedType={selectedType}
+            onTypeSelect={handleTypeSelect}
+          />
+        </div>
+
+        <p className="text-center text-sm text-gray-400">
+          {searchCount === null ? '\u00a0' : `${searchCount} Pokémon`}
+        </p>
 
         {isSearchLoading ? (
           <div className="flex justify-center py-16">
@@ -91,21 +99,24 @@ export function HomePage() {
     );
   }
 
-  if (selectedType && typePokemonIds) {
-    // Type filter mode
-    displayList = pokemonList.filter((p) => typePokemonIds.includes(p.id));
-    isLoading = isListLoading || isTypesLoading;
+  if (selectedType) {
+    // Type filter mode: use the full list from the type endpoint directly,
+    // not a filtered subset of the paginated list.
+    displayList = typePokemonList ?? [];
+    isLoading = isTypesLoading;
   }
 
   if (isListError) {
     return (
       <div className="space-y-6">
         <SearchBar value={searchTerm} onChange={handleSearchChange} />
-        <TypeFilter
-          types={types}
-          selectedType={selectedType}
-          onTypeSelect={handleTypeSelect}
-        />
+        <div className="-mx-4 px-4 overflow-x-auto py-1">
+          <TypeFilter
+            types={types}
+            selectedType={selectedType}
+            onTypeSelect={handleTypeSelect}
+          />
+        </div>
         <ErrorMessage
           message="Failed to load Pokémon. Please try again."
           onRetry={() => window.location.reload()}
@@ -114,15 +125,25 @@ export function HomePage() {
     );
   }
 
+  const countLabel = isLoading
+    ? '\u00a0'
+    : selectedType
+      ? `${displayList.length} Pokémon`
+      : `${pokemonList.length} of ${totalCount} Pokémon`;
+
   return (
     <div className="space-y-6">
       <SearchBar value={searchTerm} onChange={handleSearchChange} />
 
-      <TypeFilter
-        types={types}
-        selectedType={selectedType}
-        onTypeSelect={handleTypeSelect}
-      />
+      <div className="-mx-4 px-4 overflow-x-auto py-1">
+        <TypeFilter
+          types={types}
+          selectedType={selectedType}
+          onTypeSelect={handleTypeSelect}
+        />
+      </div>
+
+      <p className="text-center text-sm text-gray-400">{countLabel}</p>
 
       <PokemonGrid pokemonList={displayList} isLoading={isLoading} />
 
