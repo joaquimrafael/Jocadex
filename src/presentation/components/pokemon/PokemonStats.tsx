@@ -13,6 +13,8 @@ function getBarColor(value: number): string {
 }
 
 export function PokemonStats({ stats }: PokemonStatsProps) {
+  const total = stats.reduce((sum, stat) => sum + stat.baseStat, 0);
+
   return (
     <div className="space-y-3">
       {stats.map((stat) => {
@@ -41,6 +43,15 @@ export function PokemonStats({ stats }: PokemonStatsProps) {
           </div>
         );
       })}
+
+      <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+        <span className="text-sm text-gray-500 font-medium w-20 text-right flex-shrink-0">
+          Total
+        </span>
+        <span className="text-sm font-bold text-gray-800 w-8 text-right flex-shrink-0">
+          {total}
+        </span>
+      </div>
     </div>
   );
 }

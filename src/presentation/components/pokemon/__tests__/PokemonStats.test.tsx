@@ -37,4 +37,11 @@ describe('PokemonStats', () => {
     expect(bars).toHaveLength(6);
     expect(bars[0]).toHaveAttribute('aria-valuenow', '45');
   });
+
+  it('renders the total sum of all base stats', () => {
+    render(<PokemonStats stats={mockStats} />);
+    // 45 + 49 + 49 + 65 + 65 + 45 = 318
+    expect(screen.getByText('Total')).toBeInTheDocument();
+    expect(screen.getByText('318')).toBeInTheDocument();
+  });
 });
